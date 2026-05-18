@@ -1,0 +1,15 @@
+{
+  "name": "personal-file-transfer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A small temporary file transfer website for personal devices.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "start:local": "node scripts/start-local.mjs",
+    "check": "node --check server.js && node --check public/app.js && node --check scripts/start-local.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

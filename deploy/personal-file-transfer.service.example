@@ -1,0 +1,22 @@
+[Unit]
+Description=Personal temporary file transfer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=filetransfer
+Group=filetransfer
+WorkingDirectory=/opt/personal-file-transfer
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/personal-file-transfer/.env
+ExecStart=/usr/bin/node /opt/personal-file-transfer/server.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/personal-file-transfer/data
+
+[Install]
+WantedBy=multi-user.target

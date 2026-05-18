@@ -1,0 +1,343 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f4ef;
+  --panel: #ffffff;
+  --text: #202124;
+  --muted: #667085;
+  --line: #d7d3ca;
+  --accent: #0f766e;
+  --accent-strong: #115e59;
+  --danger: #b42318;
+  --shadow: 0 18px 50px rgba(31, 41, 55, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(15, 118, 110, 0.13), transparent 30rem),
+    linear-gradient(135deg, #f6f4ef 0%, #eef4f2 46%, #f8f5ee 100%);
+  color: var(--text);
+  font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.shell {
+  width: min(920px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.topbar,
+.pin-panel,
+.dropzone,
+.file-section {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(215, 211, 202, 0.85);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(28px, 6vw, 52px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.topbar p {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.icon-button,
+.delete-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.icon-button:hover,
+.delete-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pin-panel {
+  margin-top: 16px;
+  padding: 18px;
+}
+
+.pin-panel label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.pin-row {
+  display: flex;
+  gap: 10px;
+}
+
+.pin-row input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.pin-row button,
+.download-button {
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.pin-row button {
+  padding: 0 18px;
+}
+
+.dropzone {
+  margin-top: 18px;
+  min-height: 230px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-style: dashed;
+}
+
+.dropzone.dragover {
+  border-color: var(--accent);
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.dropzone input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.drop-content {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 28px;
+  pointer-events: none;
+}
+
+.upload-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #e1f3ef;
+  color: var(--accent-strong);
+  font-size: 40px;
+  font-weight: 800;
+}
+
+.drop-content h2 {
+  font-size: 26px;
+}
+
+.drop-content p {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.progress-area {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.progress-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px 14px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.progress-track {
+  height: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6e3da;
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.18s ease;
+}
+
+.file-section {
+  margin-top: 18px;
+  padding: 20px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.section-heading h2 {
+  font-size: 20px;
+}
+
+.section-heading span {
+  color: var(--muted);
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 26px;
+  text-align: center;
+}
+
+.empty-state.hidden,
+.hidden {
+  display: none;
+}
+
+.file-list {
+  display: grid;
+  gap: 10px;
+}
+
+.file-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+}
+
+.file-main {
+  min-width: 0;
+}
+
+.file-name {
+  display: block;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.file-meta {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.file-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+}
+
+.download-button:hover,
+.pin-row button:hover {
+  background: var(--accent-strong);
+}
+
+.delete-button {
+  color: var(--danger);
+  font-size: 24px;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .shell {
+    width: min(100% - 20px, 920px);
+    padding: 16px 0 32px;
+  }
+
+  .topbar,
+  .file-section {
+    padding: 16px;
+  }
+
+  .dropzone {
+    min-height: 210px;
+  }
+
+  .drop-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .file-item {
+    grid-template-columns: 1fr;
+  }
+
+  .file-actions {
+    justify-content: stretch;
+  }
+
+  .download-button {
+    flex: 1;
+  }
+}

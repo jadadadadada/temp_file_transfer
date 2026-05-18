@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>临时文件中转</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar" aria-label="状态">
+        <div>
+          <h1>临时文件中转</h1>
+          <p id="configText">正在读取配置...</p>
+        </div>
+        <button class="icon-button" id="refreshButton" type="button" title="刷新文件列表" aria-label="刷新文件列表">
+          <span aria-hidden="true">↻</span>
+        </button>
+      </section>
+
+      <section class="pin-panel hidden" id="pinPanel">
+        <label for="pinInput">访问 PIN</label>
+        <div class="pin-row">
+          <input id="pinInput" type="password" autocomplete="current-password" placeholder="输入 PIN" />
+          <button id="pinButton" type="button">解锁</button>
+        </div>
+      </section>
+
+      <section class="dropzone" id="dropzone">
+        <input id="fileInput" type="file" multiple />
+        <div class="drop-content">
+          <span class="upload-mark" aria-hidden="true">↑</span>
+          <div>
+            <h2>选择或拖入文件</h2>
+            <p id="uploadHint">文件会自动过期，也可以手动删除。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="progress-area" id="progressArea" aria-live="polite"></section>
+
+      <section class="file-section">
+        <div class="section-heading">
+          <h2>可下载文件</h2>
+          <span id="fileCount">0 个</span>
+        </div>
+        <div class="empty-state" id="emptyState">还没有文件，上传后会出现在这里。</div>
+        <div class="file-list" id="fileList"></div>
+      </section>
+    </main>
+
+    <template id="fileTemplate">
+      <article class="file-item">
+        <div class="file-main">
+          <strong class="file-name"></strong>
+          <span class="file-meta"></span>
+        </div>
+        <div class="file-actions">
+          <button class="download-button" type="button">下载</button>
+          <button class="delete-button" type="button" title="删除" aria-label="删除">×</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
