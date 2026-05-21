@@ -1,38 +1,53 @@
-# 临时文件中转
+# Personal File Transfer
 
-一个个人自用的临时文件中转网站：一台设备上传，另一台设备打开网页下载。文件默认保留 24 小时，之后自动清理，也可以在页面手动删除。
+A small temporary file transfer site for moving files between your own devices.
 
-推荐公网部署方式：Node 只监听 `127.0.0.1:3000`，Caddy 对外提供 HTTPS，并通过 `TRANSFER_PIN` 保护所有接口。
+The recommended public deployment is: Node listens on `127.0.0.1:3000`, Caddy provides HTTPS, and every API request is protected by `TRANSFER_PIN`.
 
-## 本地运行
+## Features
+
+- PIN-protected upload, list, delete, and direct API download endpoints.
+- Timing-safe PIN comparison with failed-attempt rate limiting.
+- Upload rate limiting per client IP.
+- Single-file uploads with max-size enforcement.
+- Resumable chunk uploads for larger files.
+- Total storage quota checks before accepting uploads.
+- Temporary upload files followed by atomic rename on completion.
+- Startup reconciliation between metadata and files on disk.
+- Expired file cleanup and stale temporary upload cleanup.
+- Streamed downloads with `Range` support, attachment disposition, and `nosniff`.
+- Per-file unguessable download URLs: `/d/<id>?t=<token>`.
+- Optional one-time token download with `?once=1`.
+
+## Local Start
 
 ```powershell
 npm start
 ```
 
-默认地址：
+Open:
 
 ```text
 http://127.0.0.1:3000
 ```
 
-如果只是临时在局域网测试，可以运行：
+For LAN testing, use:
 
 ```powershell
 npm run start:local
 ```
 
-`start:local` 会绑定 `0.0.0.0` 并允许空 PIN，只适合可信局域网临时使用。
+`start:local` binds to `0.0.0.0` and enables empty-PIN local testing. Do not use that mode on a public network.
 
-## 配置
+## Configuration
 
-复制示例配置：
+Create `.env` from the example:
 
 ```bash
 cp .env.example .env
 ```
 
-`.env` 示例：
+Example:
 
 ```env
 HOST=127.0.0.1
@@ -40,42 +55,68 @@ PORT=3000
 DATA_DIR=./data
 TTL_HOURS=24
 MAX_FILE_MB=2048
+TOTAL_QUOTA_GB=20
+RESUMABLE_CHUNK_MB=8
+PIN_FAILURE_LIMIT=20
+UPLOADS_PER_MINUTE=10
 TRANSFER_PIN=change-me
 ```
 
-说明：
+- `HOST`: Node bind host. Keep `127.0.0.1` behind Caddy on a VPS.
+- `PORT`: Node port. Default `3000`.
+- `DATA_DIR`: upload, metadata, and log directory. Default `./data`.
+- `TTL_HOURS`: file lifetime. Default `24`.
+- `MAX_FILE_MB`: maximum single file size. Default `2048`.
+- `TOTAL_QUOTA_GB`: total stored-file quota. Default `20`.
+- `RESUMABLE_CHUNK_MB`: browser chunk size for resumable uploads. Default `8`.
+- `PIN_FAILURE_LIMIT`: failed PIN attempts per IP per 10 minutes. Default `20`.
+- `UPLOADS_PER_MINUTE`: upload starts per IP per minute. Default `10`.
+- `TRANSFER_PIN`: required in production or when binding publicly.
 
-- `HOST`：Node 监听地址。VPS 公网部署保持 `127.0.0.1`，不要直接暴露 Node 端口。
-- `PORT`：Node 监听端口，默认 `3000`。
-- `DATA_DIR`：运行数据目录，默认 `./data`。
-- `TTL_HOURS`：文件保留小时数，默认 `24`。
-- `MAX_FILE_MB`：单个文件最大大小，默认 `2048`。
-- `TRANSFER_PIN`：访问 PIN。公网或 `NODE_ENV=production` 下必须设置。
+## Metadata Store
 
-## Ubuntu/Debian VPS 部署
+If `better-sqlite3` is installed, the service uses `data/files.db` and imports existing `data/files.json` records on startup.
 
-以下假设项目放在 `/opt/personal-file-transfer`。
+If `better-sqlite3` is not installed, the service falls back to `data/files.json` so local development still works. For production, install dependencies normally and confirm the startup log says:
 
-1. 安装 Node.js 和 Caddy。
-2. 将项目放到 `/opt/personal-file-transfer`。
-3. 复制并编辑配置：
+```text
+Metadata store: SQLite
+```
+
+## Upload Modes
+
+Small files use a single `POST /api/upload`.
+
+Files larger than `RESUMABLE_CHUNK_MB` use:
+
+- `POST /api/uploads/resumable/init`
+- `PATCH /api/uploads/resumable/<uploadId>` with `X-Upload-Offset`
+- `GET /api/uploads/resumable/<uploadId>` to recover the current offset
+- `DELETE /api/uploads/resumable/<uploadId>` to cancel
+
+Chunks are appended only at the exact current offset. After the final byte arrives, the server atomically renames the temp file and creates the metadata record.
+
+## Ubuntu/Debian VPS
+
+Install Node.js and Caddy, then place the project at `/opt/personal-file-transfer`.
 
 ```bash
 cd /opt/personal-file-transfer
 cp .env.example .env
 nano .env
+npm install
 ```
 
-务必把 `TRANSFER_PIN=change-me` 改成自己的长 PIN。
+Change `TRANSFER_PIN=change-me` to a strong private PIN.
 
-4. 创建运行用户和目录权限：
+Create a service user:
 
 ```bash
 sudo useradd --system --home /opt/personal-file-transfer --shell /usr/sbin/nologin filetransfer
 sudo chown -R filetransfer:filetransfer /opt/personal-file-transfer
 ```
 
-5. 安装 systemd 服务：
+Install the systemd unit:
 
 ```bash
 sudo cp deploy/personal-file-transfer.service.example /etc/systemd/system/personal-file-transfer.service
@@ -83,7 +124,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now personal-file-transfer
 ```
 
-查看状态和日志：
+Check logs:
 
 ```bash
 sudo systemctl status personal-file-transfer
@@ -92,15 +133,24 @@ sudo journalctl -u personal-file-transfer -f
 
 ## Caddy HTTPS
 
-将域名解析到 VPS，然后参考 `deploy/Caddyfile.example`：
+Point your domain to the VPS and adapt `deploy/Caddyfile.example`:
 
 ```caddyfile
 your-domain.com {
-	reverse_proxy 127.0.0.1:3000
+	request_body {
+		max_size 2GB
+	}
+
+	reverse_proxy 127.0.0.1:3000 {
+		transport http {
+			read_timeout 30m
+			write_timeout 30m
+		}
+	}
 }
 ```
 
-应用配置：
+Then reload Caddy:
 
 ```bash
 sudo cp deploy/Caddyfile.example /etc/caddy/Caddyfile
@@ -108,37 +158,33 @@ sudo nano /etc/caddy/Caddyfile
 sudo systemctl reload caddy
 ```
 
-Caddy 会自动申请和续期 HTTPS 证书。
+## Maintenance
 
-## 日常维护
-
-停止服务：
+Stop:
 
 ```bash
 sudo systemctl stop personal-file-transfer
 ```
 
-重启服务：
+Restart:
 
 ```bash
 sudo systemctl restart personal-file-transfer
 ```
 
-清空临时文件：
+Clear all uploaded files:
 
 ```bash
 sudo systemctl stop personal-file-transfer
 sudo rm -rf /opt/personal-file-transfer/data/uploads/*
-sudo rm -f /opt/personal-file-transfer/data/files.json
+sudo rm -f /opt/personal-file-transfer/data/files.json /opt/personal-file-transfer/data/files.db*
 sudo systemctl start personal-file-transfer
 ```
 
-重新启动后会自动生成新的 `data/files.json`。
-
-## 检查
+## Checks
 
 ```bash
 npm run check
 ```
 
-运行数据保存在 `data/`，该目录不会提交到版本库。
+Runtime data under `data/` is ignored by git.

@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>临时文件中转</title>
+    <title>临时文件传输</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <main class="shell">
       <section class="topbar" aria-label="状态">
         <div>
-          <h1>临时文件中转</h1>
-          <p id="configText">正在读取配置...</p>
+          <h1>临时文件传输</h1>
+          <p id="configText">正在加载配置...</p>
         </div>
         <button class="icon-button" id="refreshButton" type="button" title="刷新文件列表" aria-label="刷新文件列表">
           <span aria-hidden="true">↻</span>
@@ -31,7 +31,7 @@
         <div class="drop-content">
           <span class="upload-mark" aria-hidden="true">↑</span>
           <div>
-            <h2>选择或拖入文件</h2>
+            <h2>拖拽或点击上传</h2>
             <p id="uploadHint">文件会自动过期，也可以手动删除。</p>
           </div>
         </div>
@@ -41,10 +41,10 @@
 
       <section class="file-section">
         <div class="section-heading">
-          <h2>可下载文件</h2>
+          <h2>当前文件</h2>
           <span id="fileCount">0 个</span>
         </div>
-        <div class="empty-state" id="emptyState">还没有文件，上传后会出现在这里。</div>
+        <div class="empty-state" id="emptyState">还没有可下载的文件。</div>
         <div class="file-list" id="fileList"></div>
       </section>
     </main>

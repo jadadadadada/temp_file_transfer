@@ -9,6 +9,9 @@
     "start:local": "node scripts/start-local.mjs",
     "check": "node --check server.js && node --check public/app.js && node --check scripts/start-local.mjs"
   },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.10.0"
+  },
   "engines": {
     "node": ">=20"
   }
